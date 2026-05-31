@@ -59,11 +59,7 @@
           </router-link>
         </div>
 
-        <p class="px-6 text-[10px] font-bold text-slate-500 uppercase mt-6 mb-2 tracking-widest">Pengaturan</p>
-        <button @click="auth.logout()" class="w-full flex items-center gap-3 px-6 py-3 text-red-400 hover:bg-red-900/20 transition-all border-l-4 border-transparent">
-          <i class="fas fa-power-off w-5"></i>
-          <span class="text-sm font-bold italic">Logout</span>
-        </button>
+        
       </nav>
     </aside>
 
@@ -323,6 +319,8 @@ const menuItems = computed(() => {
     { label: 'Rekap Nilai Siswa', icon: 'fas fa-file-invoice', to: `/${slug}/admin/leger` },
     { label: 'Setting SKL', icon: 'fas fa-sliders-h', to: `/${slug}/admin/template-skl` },
     { label: 'Jadwal Pengumuman', icon: 'fas fa-clock', to: `/${slug}/admin/setting-waktu` },
+    { label: 'Pengaturan Pesan', icon: 'fas fa-envelope-open-text', to: `/${slug}/admin/setting-pesan` },
+     { label: 'Background Halaman', icon: 'fas fa-image', to: `/${slug}/admin/setting-background` },
   ]
 })
 

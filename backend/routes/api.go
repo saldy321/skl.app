@@ -2,80 +2,103 @@ package routes
 
 import (
     "skl-bakcend/config"
-    "skl-bakcend/controllers"
+    "skl-bakcend/controllers/auth"
+    "skl-bakcend/controllers/super_admin"
+     "skl-bakcend/controllers"
     "skl-bakcend/middleware"
+      "skl-bakcend/controllers/siswa"
+    "skl-bakcend/controllers/admin"
 
     "github.com/gofiber/fiber/v2"
 )
 
 func Setup(app *fiber.App) {
-    // ========== PUBLIC ROUTES (NO AUTH) ==========
-    app.Post("/api/login", controllers.Login)
-    app.Post("/api/verify-otp", controllers.VerifyOTP)
-    app.Post("/api/restore-super-admin", controllers.RestoreSuperAdmin)
+  
+    app.Post("/api/login", auth.Login)
+    app.Post("/api/verify-otp", auth.VerifyOTP)
+    app.Post("/api/restore-super-admin", super_admin.RestoreSuperAdmin)
     app.Get("/api/check-instansi/:slug", controllers.CheckInstansi)
 
-    // ========== SUPER ADMIN GROUP (HARUS DI ATAS TENANT!) ==========
+  
     superAuth := app.Group("/api/super", middleware.Auth, middleware.IsSuperAdmin)
-    superAuth.Get("/dashboard", controllers.GetSuperDashboard)
-    superAuth.Post("/instansi", controllers.RegisterFullSchool)
-    superAuth.Get("/instansi", controllers.GetAllInstansi)
-    superAuth.Get("/instansi/:id", controllers.GetInstansiByID)
-    superAuth.Put("/instansi/:id", controllers.UpdateInstansi)
-    superAuth.Delete("/instansi/:id", controllers.DeleteInstansi)
-    superAuth.Post("/admin-register", controllers.RegisterAdminSekolah)
-    superAuth.Get("/admin-list", controllers.GetAllAdminSekolah)
-    superAuth.Post("/instansi/:instansi_id/reset-password", controllers.ResetPasswordAdminByInstansi)
-    superAuth.Put("/admin/:id/email", controllers.UpdateAdminEmail)
-    superAuth.Post("/impersonate/:instansi_id", controllers.ImpersonateAsAdmin)
-    superAuth.Get("/nisn/search", controllers.SearchNISN)
-    superAuth.Post("/nisn/force-delete", controllers.ForceDeleteNISN)
+    superAuth.Get("/dashboard", super_admin.GetSuperDashboard)
+    superAuth.Post("/instansi", super_admin.RegisterFullSchool)
+    superAuth.Get("/instansi", super_admin.GetAllInstansi)
+    superAuth.Get("/instansi/:id", super_admin.GetInstansiByID)
+    superAuth.Put("/instansi/:id", super_admin.UpdateInstansi)
+    superAuth.Delete("/instansi/:id", super_admin.DeleteInstansi)
+    superAuth.Post("/admin-register", super_admin.RegisterAdminSekolah)
+    superAuth.Get("/admin-list", super_admin.GetAllAdminSekolah)
+    superAuth.Post("/instansi/:instansi_id/reset-password", super_admin.ResetPasswordAdminByInstansi)
+    superAuth.Put("/admin/:id/email", super_admin.UpdateAdminEmail)
+    superAuth.Post("/impersonate/:instansi_id", super_admin.ImpersonateAsAdmin)
+    superAuth.Get("/nisn/search", super_admin.SearchNISN)
+    superAuth.Post("/nisn/force-delete", super_admin.DeleteNISN)
+    superAuth.Post("/instansi/:id/backup", super_admin.BackupManual)
+    superAuth.Get("/instansi/:id/backups", super_admin.RiwayatBackup)
+    superAuth.Post("/instansi/restore/:backupId", super_admin.PulihkanBackup)
+    superAuth.Get("/backup-setting", super_admin.AmbilSettingBackup)
+superAuth.Put("/backup-setting", super_admin.SimpanSettingBackup)
+superAuth.Get("/instansi/:id/backups/download/:backupId", super_admin.DownloadBackup)
+superAuth.Post("/instansi/:id/import", super_admin.ImportBackup)
 
-    // ========== PROTECTED ROUTES (AUTH REQUIRED, NO TENANT) ==========
+
+  
  app.Get("/api/me", middleware.Auth, controllers.GetMyProfile)
     app.Get("/api/logout", middleware.Auth, controllers.Logout)
-    app.Post("/api/upload-foto", middleware.Auth, controllers.UploadFotoProfile)
-    app.Delete("/api/delete-foto", middleware.Auth, controllers.DeleteFotoProfile)
+    app.Post("/api/upload-foto", middleware.Auth, admin.UploadFotoProfile)
+    app.Delete("/api/delete-foto", middleware.Auth, admin.DeleteFotoProfile)
 
-    // ========== TENANT GROUP (HARUS DI BAWAH SUPER ADMIN!) ==========
+    
     tenant := app.Group("/api/:slug", middleware.CheckTenant(config.DB))
-    tenant.Post("/login-siswa", controllers.LoginSiswa)
+    tenant.Post("/login-siswa", auth.LoginSiswa)
 
     portal := tenant.Group("/portal", middleware.AuthSiswa)
-    portal.Get("/dashboard", controllers.GetSiswaDashboard)
+    portal.Get("/dashboard", siswa.GetSiswaDashboard)
+    portal.Get("/setting/pesan", admin.GetSettingsPublic)
+portal.Get("/setting/background", admin.GetBackgroundSettings)
 
     authTenant := tenant.Group("", middleware.Auth)
-    authTenant.Get("/dashboard", controllers.GetAdminDashboard)
+    authTenant.Get("/dashboard", admin.GetAdminDashboard)
 
-    admin := authTenant.Group("/admin", middleware.Admin)
-    admin.Post("/check-graduation", controllers.CheckGraduationEligibility)
-    admin.Post("/execute-promotion", controllers.ExecuteMassPromotion)
-    admin.Post("/setting/waktu-buka", controllers.SetWaktuBukaPengumuman)
-    admin.Post("/siswa/import", controllers.ImportSiswaExcel)
-    admin.Post("/upload-siswa", controllers.UploadFotoSiswa)
-    admin.Delete("/siswa/:id/foto", controllers.DeleteFotoSiswa)
-    admin.Post("/setting/tampilkan-logo", controllers.UpdateTampilkanLogo)
+    adminGroup := authTenant.Group("/admin", middleware.Admin)
+      adminGroup.Post("/check-graduation", admin.CekKelayakanLulus)   
+    adminGroup.Post("/execute-promotion", admin.ProsesLulusMasal)   
+    adminGroup.Post("/setting/waktu-buka", admin.SetWaktuBukaPengumuman)
+    adminGroup.Post("/siswa/import", admin.ImportSiswaExcel)
+    adminGroup.Post("/upload-siswa", admin.UploadFotoSiswa)
+    adminGroup.Delete("/siswa/:id/foto", admin.DeleteFotoSiswa)
+    adminGroup.Post("/setting/tampilkan-logo", admin.UpdateTampilkanLogo)
+      adminGroup.Get("/setting/pesan", admin.GetSettings)
+    adminGroup.Put("/setting/pesan", admin.UpdateSettings)
+    adminGroup.Get("/setting/background", admin.GetBackgroundSettings)
+  adminGroup.Post("/setting/background/upload", admin.UploadBackground)
+  adminGroup.Delete("/setting/background", admin.DeleteBackground)
 
-    siswa := admin.Group("/siswa")
-    siswa.Get("/", controllers.GetAllSiswa)
-    siswa.Post("/", controllers.CreateSiswa)
-    siswa.Get("/:id", controllers.GetSiswaByID)
-    siswa.Put("/:id", controllers.UpdateSiswa)
-    siswa.Delete("/:id", controllers.DeleteSiswa)
 
-    admin.Get("/mapel", controllers.GetAllMapel)
-    admin.Post("/mapel", controllers.CreateMapel)
-    admin.Put("/mapel/:id", controllers.UpdateMapel)
-    admin.Delete("/mapel/:id", controllers.DeleteMapel)
+     siswaGroup := adminGroup.Group("/siswa") 
+    siswaGroup.Get("/", admin.GetAllSiswa)
+    siswaGroup.Get("/search", admin.SearchSiswa)
+      siswaGroup.Delete("/all", admin.DeleteAllSiswa)
+    siswaGroup.Post("/", admin.CreateSiswa)
+    siswaGroup.Get("/:id", admin.GetSiswaByID)
+    siswaGroup.Put("/:id", admin.UpdateSiswa)
+    siswaGroup.Delete("/:id", admin.DeleteSiswa) 
+  
 
-    admin.Get("/template-skl", controllers.GetTemplateSKL)
-    admin.Post("/template-skl", controllers.SaveTemplateSKL)
-    admin.Get("/cetak/:id", controllers.GetSKLDataForAdmin)
+    adminGroup.Get("/mapel", admin.GetAllMapel)
+    adminGroup.Post("/mapel", admin.CreateMapel)
+    adminGroup.Put("/mapel/:id", admin.UpdateMapel)
+    adminGroup.Delete("/mapel/:id", admin.DeleteMapel)
 
-    admin.Get("/nilai/filters", controllers.GetFilterSiswa)
-    admin.Get("/nilai/template", controllers.DownloadTemplateNilai)
-    admin.Post("/nilai/import", controllers.ImportNilaiExcel)
-    admin.Get("/nilai/leger", controllers.GetLegerNilai)
-    admin.Get("/nilai/filter-options", controllers.GetFilterSiswa)
+    adminGroup.Get("/template-skl", admin.AmbilTemplateSKL)
+    adminGroup.Post("/template-skl", admin.SimpanTemplateSKL)
+    adminGroup.Get("/cetak/:id", admin.AmbilDataSKLAdmin) 
+
+    adminGroup.Get("/nilai/filters", admin.GetFilterSiswa)
+    adminGroup.Get("/nilai/template", admin.DownloadTemplateNilai)
+    adminGroup.Post("/nilai/import", admin.ImportNilaiExcel)
+    adminGroup.Get("/nilai/leger", admin.GetLegerNilai)
+    adminGroup.Get("/nilai/filter-options", admin.GetFilterSiswa)
 
 }

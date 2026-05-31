@@ -44,10 +44,14 @@ if !strings.Contains(dsn, "parseTime=True") {
 		&models.TemplateSKL{},
 		&models.Siswa{},
 		&models.Mapel{},
-		&models.Nilai{},)
+		&models.Nilai{},
+		&models.BackupInstansi{},
+		&models.BackupSetting{},
+		&models.Setting_pesan{},
+		 &models.SettingBackground{},)
     if err != nil {
-        fmt.Println("❌ Gagal Migrate:", err)
+        fmt.Println(" Gagal Migrate:", err)
     } else {
-        fmt.Println("🚀 Tabel berhasil di-migrate!")
+        fmt.Println(" Tabel berhasil di-migrate!")
     }
 }

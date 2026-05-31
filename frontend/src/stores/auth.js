@@ -143,6 +143,41 @@ export const useAuthStore = defineStore('auth', {
             }, timeToNotify); 
         },
 
+        async checkAuth() {
+  try {
+    // Cek session ke backend
+    const res = await api.get('/me')
+    
+    if (res.data && res.data.id) {
+      // Session valid, update store
+      this.isLoggedIn = true
+      this.role = res.data.role
+      this.nama_instansi = res.data.nama_instansi
+      this.instansi_id = res.data.instansi_id
+      this.slug = res.data.slug
+      this.tingkat = res.data.tingkat
+      
+      // Update localStorage (sinkronisasi)
+      localStorage.setItem('isLoggedIn', 'true')
+      localStorage.setItem('role', res.data.role || '')
+      localStorage.setItem('slug', res.data.slug || '')
+      localStorage.setItem('nama_instansi', res.data.nama_instansi || '')
+      localStorage.setItem('instansi_id', res.data.instansi_id || '')
+      localStorage.setItem('tingkat', res.data.tingkat || '')
+      
+      return true
+    } else {
+      // Data tidak lengkap, logout
+      this.logout()
+      return false
+    }
+  } catch (err) {
+    // Error (401 Unauthorized), logout
+    this.logout()
+    return false
+  }
+},
+
         setSelectedYear(year) {
             this.selectedYear = year.toString();
             localStorage.setItem('selectedYear', year.toString());

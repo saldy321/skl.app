@@ -21,9 +21,16 @@ app.use(pinia)
 async function validateSessionBeforeRender() {
   const authStore = useAuthStore()
   
+  // Jika role siswa, langsung return (tidak perlu cek /me)
+  if (authStore.role === 'siswa') {
+    console.log('[MAIN] Role siswa, skip /me')
+    return
+  }
+  
   if (localStorage.getItem('isLoggedIn') === 'true') {
     try {
       const res = await api.get('/me')
+      console.log('[MAIN] Response /me:', res.data)
       
       if (res.data.status === 'success') {
         authStore.setAuthData(res.data.data)
@@ -31,8 +38,8 @@ async function validateSessionBeforeRender() {
         await authStore.logout()
       }
     } catch (error) {
-     
-      await authStore.logout() 
+      console.log('[MAIN] Error fetch /me:', error)
+      await authStore.logout()
     }
   } else {
     authStore.$reset()

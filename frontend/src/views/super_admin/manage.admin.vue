@@ -58,6 +58,13 @@
         >
           <i class="fas fa-pen text-xs"></i>
         </button>
+        <button 
+  @click="openResetPasswordModal(admin)"
+  title="Reset Password"a
+  class="p-1.5 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded transition-colors"
+>
+  <i class="fas fa-key text-xs"></i>
+</button>
       </div>
     </td>
   </tr>
@@ -99,6 +106,33 @@
       </div>
     </div>
   </div>
+  <!-- MODAL RESET PASSWORD -->
+<div v-if="showResetModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm">
+  <div class="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
+    <div class="px-6 py-4 border-b bg-gray-50 flex justify-between items-center">
+      <h3 class="text-sm font-bold text-gray-900">Reset Password Admin</h3>
+      <button @click="closeResetModal" class="text-gray-400 hover:text-gray-600">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="p-6 space-y-4">
+      <div class="p-3 bg-orange-50 rounded-lg">
+        <p class="text-sm font-semibold">{{ selectedAdmin?.instansi?.nama_instansi }}</p>
+        <p class="text-xs text-gray-500">{{ selectedAdmin?.email }}</p>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-gray-700 mb-2">Password Baru</label>
+        <input v-model="newPassword" type="password" placeholder="Minimal 6 karakter" class="w-full px-3 py-2 rounded-md border border-gray-300">
+      </div>
+      <div class="flex gap-3">
+        <button @click="closeResetModal" class="flex-1 px-4 py-2 border rounded-md text-sm">Batal</button>
+        <button @click="submitResetPassword" :disabled="isResetting" class="flex-1 px-4 py-2 bg-orange-600 text-white rounded-md text-sm">
+          {{ isResetting ? 'Memproses...' : 'Reset Password' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 </template>
 
 <script setup>
@@ -155,6 +189,43 @@ const submitEditEmail = async () => {
     alert('❌ Gagal update email: ' + (err.response?.data?.message || 'Terjadi kesalahan'))
   } finally {
     updating.value = false
+  }
+}
+const showResetModal = ref(false)
+const newPassword = ref('')
+const isResetting = ref(false)
+
+const openResetPasswordModal = (admin) => {
+  selectedAdmin.value = admin
+  showResetModal.value = true
+}
+
+const closeResetModal = () => {
+  showResetModal.value = false
+  selectedAdmin.value = null
+  newPassword.value = ''
+}
+
+const submitResetPassword = async () => {
+  if (!newPassword.value || newPassword.value.length < 6) {
+    alert('Password minimal 6 karakter!')
+    return
+  }
+
+  isResetting.value = true
+  try {
+    const res = await api.post(`/super/instansi/${selectedAdmin.value.instansi.id}/reset-password`, {
+      new_password: newPassword.value
+    })
+    if (res.data.status === 'success') {
+      alert('✅ ' + res.data.message)
+      closeResetModal()
+    }
+  } catch (err) {
+    console.error(err)
+    alert('❌ Gagal reset password: ' + (err.response?.data?.message || 'Terjadi kesalahan'))
+  } finally {
+    isResetting.value = false
   }
 }
 

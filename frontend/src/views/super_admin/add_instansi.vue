@@ -34,7 +34,19 @@
             >
           </div>
 
-          <!-- Slug / Kode -->
+          <!-- Kode Instansi -->
+          <div class="col-span-2 md:col-span-1">
+            <label class="block text-xs font-semibold text-gray-700 mb-1.5">Kode Instansi <span class="text-red-500">*</span></label>
+            <input 
+              v-model="form.kode_instansi" 
+              type="text" 
+              required 
+              class="w-full px-4 py-2.5 rounded-lg border border-gray-300 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-gray-400" 
+              placeholder="Contoh: SMKN1JKT"
+            >
+          </div>
+
+          <!-- Slug Sekolah -->
           <div class="col-span-2 md:col-span-1">
             <label class="block text-xs font-semibold text-gray-700 mb-1.5">Slug Sekolah <span class="text-red-500">*</span></label>
             <div class="relative">
@@ -119,7 +131,7 @@
       <div class="flex flex-col sm:flex-row justify-end gap-4 pt-4 border-t border-gray-200">
         <button 
           type="button" 
-          @click="resetForm" 
+          @click="handleCancel" 
           class="px-6 py-2.5 rounded-lg border border-gray-300 text-gray-700 text-sm font-semibold hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
         >
           Batal
@@ -144,8 +156,8 @@
 import { ref, reactive, onMounted } from 'vue'
 import api from '@/api'
 import Swal from 'sweetalert2'
+import { useRouter } from 'vue-router'
 
-// Ambil enum dari BE (disinkronkan manual di FE)
 const TINGKAT_SEKOLAH = {
   SD: "SD",
   SMP: "SMP",
@@ -155,20 +167,10 @@ const TINGKAT_SEKOLAH = {
   SMK: "SMK",
 }
 
-const showModal = ref(false)
+const router = useRouter()
 const isSubmitting = ref(false)
 const loadingTable = ref(false)
 const listInstansi = ref([])
-
-// Fungsi untuk generate slug otomatis dari nama
-const generateSlug = () => {
-  if (form.nama_instansi && !form.slug) {
-    form.slug = form.nama_instansi
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-|-$/g, '')
-  }
-}
 
 const form = reactive({
   nama_instansi: '',
@@ -180,6 +182,15 @@ const form = reactive({
   password: ''
 })
 
+const generateSlug = () => {
+  if (form.nama_instansi && !form.slug) {
+    form.slug = form.nama_instansi
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')
+  }
+}
+
 const resetForm = () => {
   Object.assign(form, {
     nama_instansi: '',
@@ -190,11 +201,6 @@ const resetForm = () => {
     email: '',
     password: ''
   })
-}
-
-const openModal = () => {
-  resetForm()
-  showModal.value = true
 }
 
 const fetchInstansi = async () => {
@@ -212,13 +218,44 @@ const fetchInstansi = async () => {
 const handleSubmit = async () => {
   isSubmitting.value = true
   
-  // Validasi slug: generate otomatis jika kosong
+  // Generate slug jika kosong
   let slug = form.slug
   if (!slug) {
     slug = form.nama_instansi
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-|-$/g, '')
+  }
+  
+  // Validasi
+  if (!form.nama_instansi) {
+    Swal.fire('Peringatan', 'Nama instansi wajib diisi!', 'warning')
+    isSubmitting.value = false
+    return
+  }
+  
+  if (!form.kode_instansi) {
+    Swal.fire('Peringatan', 'Kode instansi wajib diisi!', 'warning')
+    isSubmitting.value = false
+    return
+  }
+  
+  if (!form.tingkat_sekolah) {
+    Swal.fire('Peringatan', 'Tingkat sekolah wajib dipilih!', 'warning')
+    isSubmitting.value = false
+    return
+  }
+  
+  if (!form.email) {
+    Swal.fire('Peringatan', 'Email admin wajib diisi!', 'warning')
+    isSubmitting.value = false
+    return
+  }
+  
+  if (!form.password || form.password.length < 6) {
+    Swal.fire('Peringatan', 'Password admin minimal 6 karakter!', 'warning')
+    isSubmitting.value = false
+    return
   }
   
   const payload = {
@@ -243,33 +280,12 @@ const handleSubmit = async () => {
   }
 }
 
-const confirmDelete = async (item) => {
-  const result = await Swal.fire({
-    title: 'Hapus Instansi?',
-    text: `Semua data ${item.nama_instansi} bakal ilang!`,
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#0f172a',
-    cancelButtonText: 'Batal',
-    confirmButtonText: 'Ya, Hapus!'
-  })
-
-  if (result.isConfirmed) {
-    try {
-      await api.delete(`/super/instansi/${item.id}`)
-      Swal.fire('Terhapus!', 'Instansi ludes.', 'success')
-      fetchInstansi()
-    } catch (err) {
-      Swal.fire('Error!', 'Gagal hapus data.', 'error')
-    }
-  }
+const handleCancel = () => {
+  resetForm()
+  router.push('/super-admin/instansi')
 }
 
-onMounted(() => fetchInstansi())
-
-// Ekspor fungsi yang diperlukan (untuk parent component jika ada)
-defineExpose({
-  openModal,
-  fetchInstansi
+onMounted(() => {
+  fetchInstansi()
 })
 </script>

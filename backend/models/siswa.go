@@ -25,6 +25,8 @@ type Siswa struct {
 
 
 func (s *Siswa) BeforeCreate(tx *gorm.DB) (err error) {
+	if s.ID == uuid.Nil {
 	s.ID = uuid.New()
+	}
 	return
 }

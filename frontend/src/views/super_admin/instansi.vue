@@ -20,111 +20,110 @@
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="bg-gray-50 border-b border-gray-200">
-              <th class="px-6 py-3 text-xs font-bold text-gray-500 uppercase">Informasi Sekolah</th>
-              <th class="px-6 py-3 text-xs font-bold text-gray-500 uppercase text-center">Jenjang</th>
-              <th class="px-6 py-3 text-xs font-bold text-gray-500 uppercase">Slug / URL</th>
-              <th class="px-6 py-3 text-xs font-bold text-gray-500 uppercase text-right">Aksi</th>
+              <th class="px-6 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Informasi Sekolah</th>
+              <th class="px-6 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider text-center">Kode Instansi</th>
+              <th class="px-6 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider text-center">Jenjang</th>
+              <th class="px-6 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Slug / URL</th>
+              <th class="px-6 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider text-right">Terdaftar</th>
+              <th class="px-6 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider text-right">Aksi</th>
             </tr>
           </thead>
-        <tbody class="divide-y divide-gray-100">
-  <tr v-for="item in instansiList" :key="item.id" class="hover:bg-gray-50">
-    <td class="px-6 py-4">
-      <div class="flex items-center gap-3">
-        <!-- LOGO SEKOLAH -->
-        <div class="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden bg-white border border-gray-200">
-          <img 
-            v-if="item.logo_instansi"
-            :src="`http://localhost:3000/uploads/instansi/${item.logo_instansi}`"
-            class="w-full h-full object-cover"
-            alt="Logo"
-          />
-          <div v-else class="w-full h-full bg-blue-50 text-blue-600 flex items-center justify-center text-xs font-bold">
-            {{ item.nama_instansi?.substring(0,2).toUpperCase() }}
-          </div>
-        </div>
-        <div>
-          <h4 class="text-sm font-semibold text-gray-900">{{ item.nama_instansi }}</h4>
-          <p class="text-[10px] text-gray-400 font-mono">ID: {{ item.id?.substring(0,8) }}...</p>
-        </div>
-      </div>
-    </td>
-    <td class="px-6 py-4 text-center">
-      <span class="inline-flex px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-700 text-[10px] font-semibold">
-        {{ item.tingkat_sekolah || 'Umum' }}
-      </span>
-    </td>
-    <td class="px-6 py-4">
-      <div class="flex items-center gap-2">
-        <i class="fas fa-link text-gray-300 text-xs"></i>
-        <span class="text-xs text-gray-600 font-medium">/{{ item.slug }}</span>
-      </div>
-    </td>
-    <td class="px-6 py-4 text-right">
-      <div class="flex items-center justify-end gap-2">
-        <button 
-          @click="impersonateAsAdmin(item)" 
-          title="Masuk sebagai Admin Sekolah" 
-          class="p-1.5 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded transition-colors"
-        >
-          <i class="fas fa-user-secret text-xs"></i>
-        </button>
-        
-        <router-link :to="`/super-admin/instansi/edit/${item.id}`" title="Edit Data" class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors">
-          <i class="fas fa-pen text-xs"></i>
-        </router-link>
+          <tbody class="divide-y divide-gray-100">
+            <tr v-for="item in instansiList" :key="item.id" class="hover:bg-gray-50 transition-colors duration-150">
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <!-- LOGO SEKOLAH -->
+                  <div class="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden bg-white border border-gray-200">
+                    <img 
+                      v-if="item.logo_instansi"
+                      :src="`http://localhost:3000/uploads/instansi/${item.logo_instansi}`"
+                      class="w-full h-full object-cover"
+                      alt="Logo"
+                    />
+                    <div v-else class="w-full h-full bg-blue-50 text-blue-600 flex items-center justify-center text-xs font-bold">
+                      {{ item.nama_instansi ? item.nama_instansi.substring(0, 2).toUpperCase() : 'SC' }}
+                    </div>
+                  </div>
+                  
+                  <!-- INFO TEKS -->
+                  <div>
+                    <h4 class="text-sm font-semibold text-gray-900">{{ item.nama_instansi }}</h4>
+                    <p class="text-[10px] text-gray-400 font-mono mt-0.5">ID: {{ item.id.toString().substring(0,8) }}...</p>
+                  </div>
+                </div>
+              </td>
 
-        <button 
-          @click="openResetModal(item)" 
-          title="Reset Password Admin" 
-          class="p-1.5 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded transition-colors"
-        >
-          <i class="fas fa-key text-xs"></i>
-        </button>
+              <td class="px-6 py-4 text-center">
+                <span class="inline-flex px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-700 text-[10px] font-semibold">
+                  {{ item.kode_instansi || '-' }}
+                </span>
+              </td>
 
-        <button 
-          @click="openDeleteModal(item)" 
-          title="Hapus Instansi" 
-          class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
-        >
-          <i class="fas fa-trash text-xs"></i>
-        </button>
-      </div>
-    </td>
-  </tr>
-  <tr v-if="instansiList.length === 0">
-    <td colspan="4" class="px-6 py-12 text-center text-gray-500">
-      Belum ada data instansi
-    </td>
-  </tr>
-</tbody>
+              <td class="px-6 py-4 text-center">
+                <span class="inline-flex px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-700 text-[10px] font-semibold">
+                  {{ item.tingkat_sekolah || 'Umum' }}
+                </span>
+              </td>
+
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-2">
+                  <i class="fas fa-link text-gray-300 text-[10px]"></i>
+                  <span class="text-xs text-gray-600 font-medium">/{{ item.slug }}</span>
+                </div>
+              </td>
+
+              <td class="px-6 py-4 text-right">
+                <span class="text-xs text-gray-500">{{ formatDate(item.created_at) }}</span>
+              </td>
+
+              <td class="px-6 py-4 text-right">
+                <div class="flex items-center justify-end gap-2">
+                  <!-- Impersonate -->
+                  <button 
+                    @click="impersonateAsAdmin(item)" 
+                    title="Masuk sebagai Admin Sekolah" 
+                    class="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-purple-600 hover:bg-purple-50 transition-colors"
+                  >
+                    <i class="fas fa-user-secret text-xs"></i>
+                  </button>
+                  
+                  <!-- Edit -->
+                  <router-link 
+                    :to="`/super-admin/instansi/edit/${item.id}`" 
+                    title="Edit Data Instansi" 
+                    class="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                  >
+                    <i class="fas fa-pen text-xs"></i>
+                  </router-link>
+
+                  <!-- Hapus -->
+                  <button 
+                    @click="openDeleteModal(item)" 
+                    title="Hapus Instansi" 
+                    class="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    <i class="fas fa-trash text-xs"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr v-if="instansiList.length === 0">
+              <td colspan="6" class="px-6 py-12 text-center">
+                <div class="inline-flex flex-col items-center justify-center">
+                  <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
+                    <i class="fas fa-school text-gray-400 text-lg"></i>
+                  </div>
+                  <h3 class="text-sm font-semibold text-gray-900">Belum Ada Data</h3>
+                  <p class="text-xs text-gray-500 mt-1">Silakan tambahkan instansi sekolah baru.</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
         </table>
       </div>
-    </div>
-
-    <!-- MODAL RESET PASSWORD -->
-    <div v-if="showResetModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm">
-      <div class="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
-        <div class="px-6 py-4 border-b bg-gray-50 flex justify-between items-center">
-          <h3 class="text-sm font-bold text-gray-900">Reset Password Admin</h3>
-          <button @click="closeResetModal" class="text-gray-400 hover:text-gray-600">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-        <div class="p-6 space-y-4">
-          <div class="p-3 bg-blue-50 rounded-lg">
-            <p class="text-sm font-semibold">{{ selectedInstansi?.nama_instansi }}</p>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-gray-700 mb-2">Password Baru</label>
-            <input v-model="newPassword" type="password" placeholder="Minimal 6 karakter" class="w-full px-3 py-2 rounded-md border border-gray-300">
-          </div>
-          <div class="flex gap-3">
-            <button @click="closeResetModal" class="flex-1 px-4 py-2 border rounded-md">Batal</button>
-            <button @click="submitResetPassword" :disabled="isResetting" class="flex-1 px-4 py-2 bg-orange-600 text-white rounded-md">
-              {{ isResetting ? 'Memproses...' : 'Reset Password' }}
-            </button>
-          </div>
-        </div>
+      
+      <div class="px-6 py-3 border-t border-gray-200 bg-gray-50 flex justify-between items-center">
+        <p class="text-[10px] text-gray-500">Showing all records</p>
       </div>
     </div>
   </div>
@@ -138,10 +137,18 @@ import Swal from 'sweetalert2'
 
 const router = useRouter()
 const instansiList = ref([])
-const showResetModal = ref(false)
-const selectedInstansi = ref(null)
-const newPassword = ref('')
-const isResetting = ref(false)
+
+const formatDate = (timestamp) => {
+  if (!timestamp) return '-'
+  const date = new Date(timestamp)
+  return date.toLocaleDateString('id-ID', { 
+    day: 'numeric', 
+    month: 'short', 
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
 
 const fetchInstansi = async () => {
   try {
@@ -200,39 +207,6 @@ const openDeleteModal = (instansi) => {
       }
     }
   })
-}
-
-const openResetModal = (instansi) => {
-  selectedInstansi.value = instansi
-  showResetModal.value = true
-}
-
-const closeResetModal = () => {
-  showResetModal.value = false
-  selectedInstansi.value = null
-  newPassword.value = ''
-}
-
-const submitResetPassword = async () => {
-  if (!newPassword.value || newPassword.value.length < 6) {
-    Swal.fire('Error', 'Password minimal 6 karakter!', 'error')
-    return
-  }
-
-  isResetting.value = true
-  try {
-    const res = await api.post(`/super/instansi/${selectedInstansi.value.id}/reset-password`, {
-      new_password: newPassword.value
-    })
-    if (res.data.status === 'success') {
-      Swal.fire('Berhasil!', res.data.message, 'success')
-      closeResetModal()
-    }
-  } catch (err) {
-    Swal.fire('Gagal!', err.response?.data?.message || 'Terjadi kesalahan', 'error')
-  } finally {
-    isResetting.value = false
-  }
 }
 
 onMounted(() => {
